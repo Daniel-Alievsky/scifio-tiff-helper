@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2017 Daniel Alievsky, AlgART Laboratory (http://algart.net)
+ * Copyright (c) 2014-2019 Daniel Alievsky, AlgART Laboratory (http://algart.net)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package net.imaging4j.tiff.helper;
+package net.algart.scifio.tiff.helper;
 
 import io.scif.FormatException;
 import io.scif.SCIFIO;
