@@ -12,6 +12,11 @@
       <option name="url" value="https://maven.siams.com/nexus/content/repositories/releases/" />
     </remote-repository>
     <remote-repository>
+      <option name="id" value="imagej.public" />
+      <option name="name" value="imagej.public" />
+      <option name="url" value="https://maven.imagej.net/content/groups/public" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="central" />
       <option name="name" value="Central Repository" />
       <option name="url" value="https://repo.maven.apache.org/maven2" />
