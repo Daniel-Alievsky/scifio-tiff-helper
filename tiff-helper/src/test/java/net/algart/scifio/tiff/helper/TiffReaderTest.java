@@ -36,6 +36,7 @@ import java.io.IOException;
 
 public class TiffReaderTest {
     private static final int MAX_IMAGE_SIZE = 6000;
+    private static final boolean CACHED = true;
 
     public static void main(String[] args) throws IOException, FormatException {
         if (args.length < 3) {
@@ -51,24 +52,36 @@ public class TiffReaderTest {
         System.out.printf("Opening %s...%n", tiffFile);
         CachingTiffReader reader = new CachingTiffReader(new SCIFIO().getContext(), tiffFile);
         final IFD ifd = reader.getIFDByIndex(ifdIndex);
-        final int width = (int) Math.min(ifd.getImageWidth(), MAX_IMAGE_SIZE);
-        final int height = (int) Math.min(ifd.getImageLength(), MAX_IMAGE_SIZE);
+        final int w = (int) Math.min(ifd.getImageWidth(), MAX_IMAGE_SIZE);
+        final int h = (int) Math.min(ifd.getImageLength(), MAX_IMAGE_SIZE);
         final int bandCount = ifd.getSamplesPerPixel();
 
-        System.out.printf("Reading data %dx%dx%d from IFD #%d/%d %s[%dx%d]:%n%s",
-            width, height, bandCount, ifdIndex, reader.getIFDCount(),
-            TiffTools.javaElementType(ifd.getPixelType()).getSimpleName(),
-            ifd.getImageWidth(),
-            ifd.getImageLength(),
-            TiffTools.toString(ifd));
-        byte[] bytes = (byte[]) reader.readSamplesToJavaArray(
-            ifdIndex, 0, 0, width, height, byte.class, null);
+        byte[] bytes = null;
+        for (int test = 1; test <= 10; test++) {
+            if (test == 1) {
+                System.out.printf("Reading data %dx%dx%d from IFD #%d/%d %s[%dx%d]:%n%s",
+                        w, h, bandCount, ifdIndex, reader.getIFDCount(),
+                        TiffTools.javaElementType(ifd.getPixelType()).getSimpleName(),
+                        ifd.getImageWidth(),
+                        ifd.getImageLength(),
+                        TiffTools.toString(ifd));
+            } else if (!CACHED) {
+                reader = new CachingTiffReader(new SCIFIO().getContext(), tiffFile);
+            }
+            long t1 = System.nanoTime();
+            bytes = (byte[]) reader.readSamplesToJavaArray(
+                    ifdIndex, 0, 0, w, h, byte.class, null);
+            long t2 = System.nanoTime();
+            System.out.printf("Test #%d: %dx%d (%.3f MB) loaded in %.3f ms, %.3f MB/sec%n",
+                    test, w, h, bytes.length / 1048576.0,
+                    (t2 - t1) * 1e-6, (bytes.length / 1048576.0 / ((t2 - t1) * 1e-9)));
+        }
 
 //        final TiffParser parser = new TiffParser(new SCIFIO().getContext(), tiffFile.getPath());
-//        parser.getSamples(ifd, bytes, 0, 0, width, height);
+//        parser.getSamples(ifd, bytes, 0, 0, w, h);
 
         System.out.printf("Converting data to BufferedImage...%n");
-        final BufferedImage image = bytesToImage(bytes, width, height, bandCount);
+        final BufferedImage image = bytesToImage(bytes, w, h, bandCount);
         System.out.printf("Saving result image into %s...%n", resultFile);
         if (!ImageIO.write(image, "png", resultFile)) {
             throw new IIOException("Cannot write " + resultFile);
