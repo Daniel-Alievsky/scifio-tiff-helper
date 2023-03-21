@@ -27,6 +27,9 @@ package net.algart.scifio.tiff.helper;
 import io.scif.FormatException;
 import io.scif.SCIFIO;
 import io.scif.formats.tiff.IFD;
+import io.scif.formats.tiff.IFDList;
+import io.scif.formats.tiff.TiffParser;
+import io.scif.util.FormatTools;
 
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
@@ -34,14 +37,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class TiffReaderTest {
+public class UsualTiffReaderTest {
     private static final int MAX_IMAGE_SIZE = 6000;
-    private static final boolean CACHED = true;
 
     public static void main(String[] args) throws IOException, FormatException {
         if (args.length < 3) {
             System.out.println("Usage:");
-            System.out.println("    " + TiffReaderTest.class.getName()
+            System.out.println("    " + UsualTiffReaderTest.class.getName()
                 + " some_tiff_file.tif ifdIndex result.png");
             return;
         }
@@ -50,27 +52,29 @@ public class TiffReaderTest {
         final File resultFile = new File(args[2]);
 
         System.out.printf("Opening %s...%n", tiffFile);
-        CachingTiffReader reader = new CachingTiffReader(new SCIFIO().getContext(), tiffFile);
-        final IFD ifd = reader.getIFDByIndex(ifdIndex);
+        TiffParser reader = new TiffParser(new SCIFIO().getContext(), tiffFile.getAbsolutePath());
+        IFDList ifDs = reader.getIFDs();
+        final IFD ifd = ifDs.get(ifdIndex);
         final int w = (int) Math.min(ifd.getImageWidth(), MAX_IMAGE_SIZE);
         final int h = (int) Math.min(ifd.getImageLength(), MAX_IMAGE_SIZE);
         final int bandCount = ifd.getSamplesPerPixel();
 
         byte[] bytes = null;
-        for (int test = 1; test <= 10; test++) {
+        for (int test = 1; test <= 5; test++) {
             if (test == 1) {
                 System.out.printf("Reading data %dx%dx%d from IFD #%d/%d %s[%dx%d]:%n%s",
-                        w, h, bandCount, ifdIndex, reader.getIFDCount(),
+                        w, h, bandCount, ifdIndex, ifDs.size(),
                         TiffTools.javaElementType(ifd.getPixelType()).getSimpleName(),
                         ifd.getImageWidth(),
                         ifd.getImageLength(),
                         TiffTools.toString(ifd));
-            } else if (!CACHED) {
-                reader = new CachingTiffReader(new SCIFIO().getContext(), tiffFile);
             }
             long t1 = System.nanoTime();
-            bytes = (byte[]) reader.readSamplesToJavaArray(
-                    ifdIndex, 0, 0, w, h, byte.class, null);
+            final int pixelType = ifd.getPixelType();
+            final int bytesPerBand = Math.max(1, FormatTools.getBytesPerPixel(pixelType));
+            bytes = new byte[w * h * bytesPerBand * bandCount];
+            reader.getSamples(ifd, bytes, 0, 0, w, h);
+            bytes = TiffTools.interleaveSamples(bytes, w * h, ifd);
             long t2 = System.nanoTime();
             System.out.printf("Test #%d: %dx%d (%.3f MB) loaded in %.3f ms, %.3f MB/sec%n",
                     test, w, h, bytes.length / 1048576.0,
