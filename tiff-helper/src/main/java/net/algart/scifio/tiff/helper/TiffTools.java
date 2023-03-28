@@ -242,7 +242,7 @@ public class TiffTools {
         throws IOException
     {
         return new RandomAccessInputStream(context,
-//            tiffFile.getAbsolutePath());
+//            file.getAbsolutePath());
             new NIOFileHandle(new SimpleNIOService(), file, "r", 65536));
         // We will use this object only for parsing TIFF, so, we don't need large buffer here
     }
