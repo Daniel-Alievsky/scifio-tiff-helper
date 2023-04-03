@@ -41,7 +41,7 @@ public class UsualTiffReaderTest {
     private static final int MAX_IMAGE_DIM = 10000;
 
     private static final int START_X = 0;
-    // - non-zero value allows to illustrate a bug in TiffParser.getTile
+    // - non-zero value allows to illustrate a bug in TiffParser.getSamples
     private static final int START_Y = 0;
 
     public static void main(String[] args) throws IOException, FormatException {

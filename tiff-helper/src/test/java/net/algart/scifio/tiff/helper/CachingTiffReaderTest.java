@@ -39,7 +39,6 @@ public class CachingTiffReaderTest {
     private static final boolean CACHED = true;
 
     private static final int START_X = 0;
-    // - non-zero value allows to illustrate a bug in TiffParser.getTile
     private static final int START_Y = 0;
 
     public static void main(String[] args) throws IOException, FormatException {
