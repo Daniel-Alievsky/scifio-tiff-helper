@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/scifio-tiff-helper.iml" filepath="$PROJECT_DIR$/scifio-tiff-helper.iml" />
-      <module fileurl="file://$PROJECT_DIR$/tiff-helper/tiff-helper.iml" filepath="$PROJECT_DIR$/tiff-helper/tiff-helper.iml" />
     </modules>
   </component>
 </project>

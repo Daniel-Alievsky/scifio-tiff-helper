@@ -38,6 +38,10 @@ public class CachingTiffReaderTest {
     private static final int MAX_IMAGE_SIZE = 6000;
     private static final boolean CACHED = true;
 
+    private static final int START_X = 0;
+    // - non-zero value allows to illustrate a bug in TiffParser.getTile
+    private static final int START_Y = 0;
+
     public static void main(String[] args) throws IOException, FormatException {
         if (args.length < 3) {
             System.out.println("Usage:");
@@ -70,7 +74,7 @@ public class CachingTiffReaderTest {
             }
             long t1 = System.nanoTime();
             bytes = (byte[]) reader.readSamplesToJavaArray(
-                    ifdIndex, 0, 0, w, h, byte.class, null);
+                    ifdIndex, START_X, START_Y, w, h, byte.class, null);
             long t2 = System.nanoTime();
             System.out.printf("Test #%d: %dx%d (%.3f MB) loaded in %.3f ms, %.3f MB/sec%n",
                     test, w, h, bytes.length / 1048576.0,

@@ -38,7 +38,11 @@ import java.io.File;
 import java.io.IOException;
 
 public class UsualTiffReaderTest {
-    private static final int MAX_IMAGE_SIZE = 10000;
+    private static final int MAX_IMAGE_DIM = 10000;
+
+    private static final int START_X = 0;
+    // - non-zero value allows to illustrate a bug in TiffParser.getTile
+    private static final int START_Y = 0;
 
     public static void main(String[] args) throws IOException, FormatException {
         if (args.length < 3) {
@@ -55,8 +59,11 @@ public class UsualTiffReaderTest {
         TiffParser reader = new TiffParser(new SCIFIO().getContext(), tiffFile.getAbsolutePath());
         IFDList ifDs = reader.getIFDs();
         final IFD ifd = ifDs.get(ifdIndex);
-        final int w = (int) Math.min(ifd.getImageWidth(), MAX_IMAGE_SIZE);
-        final int h = (int) Math.min(ifd.getImageLength(), MAX_IMAGE_SIZE);
+        final int w = (int) Math.min(ifd.getImageWidth(), MAX_IMAGE_DIM);
+        final int h = (int) Math.min(ifd.getImageLength(), MAX_IMAGE_DIM);
+        if (w <= 0 || h <= 0) {
+            throw new IllegalArgumentException("START_X or START_Y are out of image sizes");
+        }
         final int bandCount = ifd.getSamplesPerPixel();
 
         byte[] bytes = null;
@@ -73,7 +80,7 @@ public class UsualTiffReaderTest {
             final int pixelType = ifd.getPixelType();
             final int bytesPerBand = Math.max(1, FormatTools.getBytesPerPixel(pixelType));
             bytes = new byte[w * h * bytesPerBand * bandCount];
-            reader.getSamples(ifd, bytes, 0, 0, w, h);
+            reader.getSamples(ifd, bytes, START_X, START_Y, w, h);
             bytes = TiffTools.interleaveSamples(bytes, w * h, ifd);
             long t2 = System.nanoTime();
             System.out.printf("Test #%d: %dx%d (%.3f MB) loaded in %.3f ms, %.3f MB/sec%n",
