@@ -65,7 +65,7 @@ public class PureScifioReadWriteTiffTest {
         saver.writeHeader();
         System.out.printf("Writing %s...%n", targetFile);
         final IFDList ifdList = reader.getIFDs();
-        for (int ifdIndex = 0; ifdIndex < ifdList.size() - 1; ifdIndex++) {
+        for (int ifdIndex = 0; ifdIndex < ifdList.size(); ifdIndex++) {
             final IFD ifd = ifdList.get(ifdIndex);
             System.out.printf("Copying #%d/%d:%n%s%n", ifdIndex, ifdList.size(), ifd);
             final int w = (int) Math.min(ifd.getImageWidth(), MAX_IMAGE_DIM);
