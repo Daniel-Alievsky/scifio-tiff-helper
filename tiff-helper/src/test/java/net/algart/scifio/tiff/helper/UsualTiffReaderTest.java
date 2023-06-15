@@ -111,5 +111,4 @@ public class UsualTiffReaderTest {
         }
         return result;
     }
-
 }
