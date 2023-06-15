@@ -61,9 +61,6 @@ public class UsualTiffReaderTest {
         final IFD ifd = ifDs.get(ifdIndex);
         final int w = (int) Math.min(ifd.getImageWidth(), MAX_IMAGE_DIM);
         final int h = (int) Math.min(ifd.getImageLength(), MAX_IMAGE_DIM);
-        if (w <= 0 || h <= 0) {
-            throw new IllegalArgumentException("START_X or START_Y are out of image sizes");
-        }
         final int bandCount = ifd.getSamplesPerPixel();
 
         byte[] bytes = null;
