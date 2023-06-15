@@ -48,12 +48,12 @@ public class UsualTiffReaderTest {
         if (args.length < 3) {
             System.out.println("Usage:");
             System.out.println("    " + UsualTiffReaderTest.class.getName()
-                + " some_tiff_file.tif ifdIndex result.png");
+                    + " some_tiff_file.tif result.png ifdIndex");
             return;
         }
         final File tiffFile = new File(args[0]);
-        final int ifdIndex = Integer.parseInt(args[1]);
-        final File resultFile = new File(args[2]);
+        final File resultFile = new File(args[1]);
+        final int ifdIndex = Integer.parseInt(args[2]);
 
         System.out.printf("Opening %s...%n", tiffFile);
         TiffParser reader = new TiffParser(new SCIFIO().getContext(), tiffFile.getAbsolutePath());
@@ -78,7 +78,6 @@ public class UsualTiffReaderTest {
             final int bytesPerBand = Math.max(1, FormatTools.getBytesPerPixel(pixelType));
             bytes = new byte[w * h * bytesPerBand * bandCount];
             reader.getSamples(ifd, bytes, START_X, START_Y, w, h);
-            bytes = TiffTools.interleaveSamples(bytes, w * h, ifd);
             long t2 = System.nanoTime();
             System.out.printf("Test #%d: %dx%d (%.3f MB) loaded in %.3f ms, %.3f MB/sec%n",
                     test, w, h, bytes.length / 1048576.0,
@@ -97,16 +96,16 @@ public class UsualTiffReaderTest {
         System.out.println("Done");
     }
 
-    private static BufferedImage bytesToImage(byte[] bytes, int width, int height, int bandCount) {
-        final BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        for (int y = 0, offset = 0; y < height; y++) {
-            for (int x = 0; x < width; x++, offset += bandCount) {
+    private static BufferedImage bytesToImage(byte[] bytes, int w, int h, int bandCount) {
+        final BufferedImage result = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        for (int y = 0, offset = 0; y < h; y++) {
+            for (int x = 0; x < w; x++, offset++) {
                 final byte r = bytes[offset];
-                final byte g = bytes[bandCount == 1 ? offset : offset + 1];
-                final byte b = bytes[bandCount == 1 ? offset : offset + 2];
+                final byte g = bytes[bandCount == 1 ? offset : offset + w * h];
+                final byte b = bytes[bandCount == 1 ? offset : offset + 2 * w * h];
                 final int rgb = (b & 0xFF)
-                    | ((g & 0xFF) << 8)
-                    | ((r & 0xFF) << 16);
+                        | ((g & 0xFF) << 8)
+                        | ((r & 0xFF) << 16);
                 result.setRGB(x, y, rgb);
             }
         }
