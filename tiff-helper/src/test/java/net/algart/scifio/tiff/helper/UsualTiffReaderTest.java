@@ -90,7 +90,7 @@ public class UsualTiffReaderTest {
         System.out.printf("Converting data to BufferedImage...%n");
         final BufferedImage image = bytesToImage(bytes, w, h, bandCount);
         System.out.printf("Saving result image into %s...%n", resultFile);
-        if (!ImageIO.write(image, "png", resultFile)) {
+        if (!ImageIO.write(image, extension(resultFile.getName()), resultFile)) {
             throw new IIOException("Cannot write " + resultFile);
         }
         System.out.println("Done");
@@ -110,5 +110,13 @@ public class UsualTiffReaderTest {
             }
         }
         return result;
+    }
+
+    public static String extension(String fileName) {
+        int p = fileName.lastIndexOf('.');
+        if (p == -1) {
+            return "bmp";
+        }
+        return fileName.substring(p + 1);
     }
 }
